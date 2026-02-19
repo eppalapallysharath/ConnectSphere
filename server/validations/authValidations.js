@@ -27,3 +27,7 @@ exports.loginChecks = [
 exports.profileChecks=[
   header("Authorization").exists().withMessage("Authorization field is missing").custom(value => value.startsWith("Bearer")).withMessage("User Bearer keyword before token")  
 ]
+
+exports.tokenCheck=[
+  header("Authorization").exists().withMessage("Authorization field is missing").custom(value => value.startsWith("Bearer")).withMessage("User Bearer keyword before token")  
+]

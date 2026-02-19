@@ -25,7 +25,6 @@ exports.authentication = async (req, res, next) => {
 };
 
 exports.authorization = function(...roles){
-    console.log(roles)
     return (req, res, next)=>{
         const {role} = req.user
         const checkRole = roles.includes(role)

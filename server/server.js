@@ -5,12 +5,13 @@ const {connectDB} = require("./config/db.js")
 connectDB()
 const authRoutes = require("./Routes/authRoutes.js")
 const {errorMiddleware} = require("./middlewares/Error.js")
-
+const postsRoutes = require("./Routes/postRoutes.js")
 
 app.use(express.json())
 app.use(express.urlencoded(true))
 
 app.use("/api/v1/auth", authRoutes)
+app.use("/api/v1/posts", postsRoutes)
 
 app.get("/", (req, res)=>{
     res.send("hi, im running fine")
