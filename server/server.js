@@ -3,18 +3,28 @@ const app = express()
 require("dotenv").config()
 const {connectDB} = require("./config/db.js")
 connectDB()
+
 const authRoutes = require("./Routes/authRoutes.js")
+const postRoutes = require("./Routes/postRoutes.js")
+const commentsRoutes = require("./Routes/commentsRoutes.js")
+const likesRoutes = require("./Routes/likesRoutes.js")
+const usersRoutes = require("./Routes/usersRoutes.js")
+const adminRoutes = require("./Routes/adminRoutes.js")
 const {errorMiddleware} = require("./middlewares/Error.js")
-const postsRoutes = require("./Routes/postRoutes.js")
 
 app.use(express.json())
 app.use(express.urlencoded(true))
 
+// Routes
 app.use("/api/v1/auth", authRoutes)
-app.use("/api/v1/posts", postsRoutes)
+app.use("/api/v1/posts", postRoutes)
+app.use("/api/v1/comments", commentsRoutes)
+app.use("/api/v1/likes", likesRoutes)
+app.use("/api/v1/users", usersRoutes)
+app.use("/api/v1/admin", adminRoutes)
 
 app.get("/", (req, res)=>{
-    res.send("hi, im running fine")
+    res.send("ConnectSphere API - Server running fine")
 })
 
 app.use((req, res, next) => {
@@ -27,7 +37,6 @@ app.use((req, res, next) => {
     },
   });
 });
-
 
 // global error handling middleware
 app.use(errorMiddleware)
