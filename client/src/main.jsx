@@ -8,7 +8,6 @@ import { AdminProvider } from "./context/AdminContext";
 import { Toaster } from "react-hot-toast";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
     <AuthProvider>
       <PostProvider>
         <AdminProvider>
@@ -17,5 +16,4 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         </AdminProvider>
       </PostProvider>
     </AuthProvider>
-  </React.StrictMode>,
 );
