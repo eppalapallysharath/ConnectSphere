@@ -3,7 +3,7 @@ const fs = require("fs");
 const postModel = require("../models/postsModel.js");
 const commentModel = require("../models/commentModel.js");
 const cloudinary = require("cloudinary").v2;
-const {sendSuccess, sendError} = require("../utils/responseHandler.js");
+const { sendSuccess, sendError } = require("../utils/responseHandler.js");
 
 // Create post
 exports.createPosts = async (req, res) => {
@@ -39,7 +39,12 @@ exports.createPosts = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -78,20 +83,31 @@ exports.getAllPosts = async (req, res) => {
           commentsCount: commentsCount,
           createdAt: post.createdAt,
         };
-      })
+      }),
     );
 
-    sendSuccess(res, 200, "Posts fetched successfully", {
-      posts: postsWithComments,
-    }, {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalRecords: totalPosts,
-      totalPages: Math.ceil(totalPosts / limit),
-    });
+    sendSuccess(
+      res,
+      200,
+      "Posts fetched successfully",
+      {
+        posts: postsWithComments,
+      },
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalRecords: totalPosts,
+        totalPages: Math.ceil(totalPosts / limit),
+      },
+    );
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -129,7 +145,12 @@ exports.getSinglePost = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -148,39 +169,92 @@ exports.getMyOwnPosts = async (req, res) => {
       .skip(skip);
 
     const totalPosts = await postModel.countDocuments({ user: req.user._id });
-
-    // Get comments count for each post
-    const postsWithComments = await Promise.all(
-      posts.map(async (post) => {
-        const commentsCount = await commentModel.countDocuments({
-          post: post._id,
-        });
-        return {
+    sendSuccess(
+      res,
+      200,
+      "Own posts fetched successfully",
+      {
+        posts: posts.map((post) => ({
           id: post._id,
           content: post.content,
           file: post.file,
           user: {
             id: post.user._id,
             name: post.user.name,
+            profile_pic: post.user.profile_pic,
           },
           likesCount: post.likes.length,
-          commentsCount: commentsCount,
           createdAt: post.createdAt,
-        };
-      })
+        })),
+      },
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalRecords: totalPosts,
+        totalPages: Math.ceil(totalPosts / limit),
+      },
     );
-
-    sendSuccess(res, 200, "Posts fetched successfully", {
-      posts: postsWithComments,
-    }, {
-      page: parseInt(page),
-      limit: parseInt(limit),
-      totalRecords: totalPosts,
-      totalPages: Math.ceil(totalPosts / limit),
-    });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
+  }
+};
+
+// Get posts by userId
+exports.getUserPosts = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    const skip = (page - 1) * limit;
+
+    const posts = await postModel
+      .find({ user: userId })
+      .populate("user", "name profile_pic")
+      .sort({ createdAt: -1 })
+      .limit(limit * 1)
+      .skip(skip);
+
+    const totalPosts = await postModel.countDocuments({ user: userId });
+
+    sendSuccess(
+      res,
+      200,
+      "User posts fetched successfully",
+      {
+        posts: posts.map((post) => ({
+          id: post._id,
+          content: post.content,
+          file: post.file,
+          user: {
+            id: post.user._id,
+            name: post.user.name,
+            profile_pic: post.user.profile_pic,
+          },
+          likesCount: post.likes.length,
+          createdAt: post.createdAt,
+        })),
+      },
+      {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        totalRecords: totalPosts,
+        totalPages: Math.ceil(totalPosts / limit),
+      },
+    );
+  } catch (error) {
+    console.log(error);
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -188,7 +262,7 @@ exports.getMyOwnPosts = async (req, res) => {
 exports.updatePost = async (req, res) => {
   try {
     const { id: postId } = req.params;
-    const post = await postModel.findOne({user:req.user._id, _id:postId});
+    const post = await postModel.findOne({ user: req.user._id, _id: postId });
 
     if (!post) {
       return sendError(res, 404, "Post not found", "POST_NOT_FOUND");
@@ -244,7 +318,12 @@ exports.updatePost = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -264,7 +343,12 @@ exports.deletePost = async (req, res) => {
       post.user.toString() !== req.user._id.toString() &&
       req.user.role !== "admin"
     ) {
-      return sendError(res, 403, "You are not authorized to delete this post", "UNAUTHORIZED_DELETE");
+      return sendError(
+        res,
+        403,
+        "You are not authorized to delete this post",
+        "UNAUTHORIZED_DELETE",
+      );
     }
 
     // Delete image from Cloudinary
@@ -285,7 +369,12 @@ exports.deletePost = async (req, res) => {
     sendSuccess(res, 200, "Post deleted successfully");
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -295,15 +384,13 @@ exports.likePost = async (req, res) => {
     const { id: postId } = req.params;
 
     const post = await postModel.findById(postId);
-    console.log(post)
+    console.log(post);
     if (!post) {
       return sendError(res, 404, "Post not found", "POST_NOT_FOUND");
     }
 
     const userId = req.user._id.toString();
-    const userIndex = post.likes.findIndex(
-      (id) => id.toString() === userId
-    );
+    const userIndex = post.likes.findIndex((id) => id.toString() === userId);
 
     if (userIndex > -1) {
       // Unlike - remove user from likes
@@ -325,10 +412,15 @@ exports.likePost = async (req, res) => {
           likesCount: updatedPost.likes.length,
           isLiked: userIndex === -1, // true if just liked, false if just unliked
         },
-      }
+      },
     );
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
-}
+};

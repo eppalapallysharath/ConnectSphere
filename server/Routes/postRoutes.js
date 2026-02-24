@@ -8,6 +8,7 @@ const {
   updatePost,
   deletePost,
   likePost,
+  getUserPosts,
 } = require("../controllers/postsController.js");
 const { uploads } = require("../config/multer.js");
 const { tokenCheck } = require("../validations/authValidations.js");
@@ -107,6 +108,31 @@ router.get(
  *                 posts: { type: array, items: { type: object } }
  */
 router.get("/", getAllPosts);
+
+/**
+ * @swagger
+ * /api/v1/posts/user/{userId}:
+ *   get:
+ *     summary: Get posts by user ID
+ *     tags: [Posts]
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: List of posts for the user
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 posts: { type: array, items: { type: object } }
+ */
+router.get("/user/:userId", getUserPosts);
 
 /**
  * @swagger

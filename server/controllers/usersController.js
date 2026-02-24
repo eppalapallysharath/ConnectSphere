@@ -16,26 +16,31 @@ exports.getUserProfile = async (req, res) => {
     }
 
     if (user.isBlocked) {
-      return sendError(res, 403, "This user account has been blocked", "USER_BLOCKED");
+      return sendError(
+        res,
+        403,
+        "This user account has been blocked",
+        "USER_BLOCKED",
+      );
     }
 
-    sendSuccess(
-      res,
-      200,
-      "User profile fetched successfully",
-      {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        bio: user.bio,
-        role: user.role,
-        profile_pic: user.profile_pic,
-        createdAt: user.createdAt,
-      }
-    );
+    sendSuccess(res, 200, "User profile fetched successfully", {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      bio: user.bio,
+      role: user.role,
+      profile_pic: user.profile_pic,
+      createdAt: user.createdAt,
+    });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -53,7 +58,10 @@ exports.updateUserProfile = async (req, res) => {
     if (req.file) {
       // Delete old profile picture from Cloudinary if exists
       const user = await userModel.findById(userId);
-      if (user.profile_pic.file_name && user.profile_pic.file_name !== "default_icon.png") {
+      if (
+        user.profile_pic.file_name &&
+        user.profile_pic.file_name !== "default_icon.png"
+      ) {
         try {
           await cloudinary.uploader.destroy(user.profile_pic.file_name);
         } catch (err) {
@@ -71,25 +79,28 @@ exports.updateUserProfile = async (req, res) => {
       };
     }
 
-    const updatedUser = await userModel.findByIdAndUpdate(userId, updateData, {
-      new: true,
-    }).select("-password");
+    const updatedUser = await userModel
+      .findByIdAndUpdate(userId, updateData, {
+        new: true,
+      })
+      .select("-password");
 
-    sendSuccess(
-      res,
-      200,
-      "Profile updated successfully",
-      {
-        id: updatedUser._id,
-        name: updatedUser.name,
-        email: updatedUser.email,
-        bio: updatedUser.bio,
-        profile_pic: updatedUser.profile_pic,
-      }
-    );
+    sendSuccess(res, 200, "Profile updated successfully", {
+      id: updatedUser._id,
+      name: updatedUser.name,
+      email: updatedUser.email,
+      bio: updatedUser.bio,
+      role: updatedUser.role,
+      profile_pic: updatedUser.profile_pic,
+    });
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };
 
@@ -129,10 +140,15 @@ exports.getAllUsers = async (req, res) => {
         limit: parseInt(limit),
         totalRecords: totalUsers,
         totalPages: Math.ceil(totalUsers / limit),
-      }
+      },
     );
   } catch (error) {
     console.log(error);
-    sendError(res, 500, "Something went wrong, please try again later", "SERVER_ERROR");
+    sendError(
+      res,
+      500,
+      "Something went wrong, please try again later",
+      "SERVER_ERROR",
+    );
   }
 };

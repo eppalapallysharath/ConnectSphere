@@ -63,7 +63,7 @@ router.get(
  *             properties:
  *               name: { type: string }
  *               bio: { type: string }
- *               profilePic: { type: string, format: binary }
+ *               profile_pic: { type: string, format: binary }
  *     responses:
  *       200:
  *         description: Profile updated
@@ -71,7 +71,7 @@ router.get(
 router.put(
   "/update",
   tokenCheck,
-  uploads.single("profilePic"),
+  uploads.single("profile_pic"),
   validation,
   authentication,
   authorization("user", "admin"),
